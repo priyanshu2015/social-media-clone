@@ -1,3 +1,5 @@
+from typing import Any
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, HttpResponse, redirect
 from django.views import View
 from .forms import RegistrationForm
@@ -13,6 +15,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.urls import reverse, reverse_lazy
+from django.contrib.auth.views import LoginView, LogoutView
+from users.models import Profile
 
 User = get_user_model()
 
@@ -78,9 +82,20 @@ def activate(request, uidb64, token):
     if user is not None and account_activation_token.check_token(user, token) is True:
         user.is_active = True
         user.save()
+        profile = Profile.objects.create(user=user)
         messages.success(request, "Successfully Verified")
         return redirect(reverse("login"))
     else:
         return HttpResponse("Activation link is invalid or your account is already verified! Try to login")
 
 
+class LoginUserView(LoginView):
+    template_name = "authentication/login.html"
+    # success_url = reverse_lazy("home")
+
+    # def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
+    #     return super().post(request, *args, **kwargs)
+
+
+class LogoutUserView(LogoutView):
+    pass

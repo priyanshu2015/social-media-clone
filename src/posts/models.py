@@ -12,8 +12,12 @@ class Tag(TimeStampedModel):
         return "#" + self.title
     
     def clean(self) -> None:
-        super().clean()
         self.title = self.title.lower()
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
 
 
 class Post(TimeStampedModel):

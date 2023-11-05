@@ -1,0 +1,90 @@
+{% extends 'common/base.html' %}
+{% load static %}
+{% load myfilters %}
+{% block title %}
+{% endblock %}
+{% block css %}
+<style>
+    body{
+        background-color:#f5f5f5;
+
+    }
+.main-area{
+    display: flex-col;
+    align-items: center;
+    padding: 20px;
+}
+.userfeed{
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+}
+.bootstrap-tagsinput .tag{
+    background-color: aqua !important;
+}
+</style>
+{% endblock %}
+
+{% block body%}
+
+<div class="main-area">
+        <!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+    Upload New
+  </button>
+
+    <div class="userfeed">
+        {% for post in posts %}
+        <div class="card mb-4" style="width: 100%">
+            <div class="d-flex flex-row align-items-center px-2 py-1">
+                <img src="{{post.user.profile.profile_img.url}}" alt="mdo" width="50" height="50"
+                                    class="rounded-circle mr-1">
+                <b>{{post.user.username}}</b>
+            </div>
+
+            <img src="{{post.image.url}}" class="card-img-top" />
+            <div class="card-body">
+                <h6 class="card-title">{{post.like_count}} likes</h6>
+                <p class="card-text">
+                    <b>{{post.user.username}}</b> {{post.caption}}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Upload Post</h5>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST" action="{% url 'upload-post' %}" enctype="multipart/form-data"> {% csrf_token %}
+        <div class="modal-body">
+          {{form.as_p}}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    $(document).ready(function() {
+        $('input[name="tags"]').tagsinput();
+    });
+</script>
+{% endblock %}

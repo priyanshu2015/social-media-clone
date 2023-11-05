@@ -1,0 +1,63 @@
+{% extends 'common/base.html' %}
+{% load static %}
+{% load myfilters %}
+{% block title %}
+{% endblock %}
+{% block css %}
+<style>
+  body {
+    background-color: #f5f5f5;
+  }
+  .main-area {
+    display: flex-col;
+    align-items: center;
+    padding: 20px;
+  }
+</style>
+{% endblock %} 
+{% block body%}
+<div class="main-area">
+    <div class="card mb-3" style="max-width: 100%;">
+        <div class="row g-0">
+          <div class="col-md-2">
+            <img src="{{profile.profile_img.url}}" class="img-fluid rounded-start" alt="...">
+          </div>
+          <div class="col-md-8">
+
+            <div class="card-body">
+
+            <div class="d-flex flex-row align-items-center mb-2">
+
+              <h5 class="card-title mr-2">{{profile.user.username}}</h5>
+
+              {% if user.username != profile.user.username and is_following == False %}
+              <form method="POST" action="{% url 'follow' profile.user.username %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Follow</button>
+              </form>
+
+              {% elif user.username != profile.user.username and is_following == True %}
+              <form method="POST" action="{% url 'unfollow' profile.user.username %}">
+                {% csrf_token %}
+              <button type="submit" class="btn btn-light">Unfollow</button>
+              </form>
+
+              {% elif user.username == profile.user.username %}
+              <button type="submit" class="btn btn-light">Edit Profile</button>
+
+              {% endif %}
+
+            </div>
+
+              <div class="d-flex flex-row justify-content-between" style="max-width: 400px">
+                <b>{{post_count}} Posts</b>
+                <b>{{follower_count}} Followers</b>
+                <b>{{followee_count}} Following</b>
+              </div>
+              <p class="card-text">{{profile.bio}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+{% endblock %}
