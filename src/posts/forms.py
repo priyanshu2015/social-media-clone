@@ -13,3 +13,7 @@ class UploadPostForm(ModelForm):
             "image",
             "caption"
         ]
+
+
+class PostCommentForm(forms.Form):
+    comment_detail = forms.CharField(max_length=500)

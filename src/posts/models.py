@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from common.models import TimeStampedModel
+import uuid
 
 User = get_user_model()
 
@@ -21,6 +22,7 @@ class Tag(TimeStampedModel):
 
 
 class Post(TimeStampedModel):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     user = models.ForeignKey(User, related_name="posts", on_delete=models.CASCADE)
     image = models.ImageField(upload_to='posts/post_images')
     caption = models.TextField()
@@ -47,9 +49,10 @@ class PostLike(TimeStampedModel):
 
 
 class Comment(TimeStampedModel):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments", null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
-    comment = models.ForeignKey('self', on_delete=models.CASCADE, related_name="replies")
+    comment = models.ForeignKey('self', on_delete=models.CASCADE, related_name="replies", null=True, blank=True)
+    detail = models.TextField()
 
 
 class PostTag(models.Model):

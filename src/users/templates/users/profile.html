@@ -59,5 +59,58 @@
           </div>
         </div>
       </div>
+
+      <h3 class="text-center">Posts</h3>
+      <div id="postLayout" class="row row-cols-1 row-cols-md-3 g-4">
+
+      </div>
+      <div id="showMorePosts", class="text-center my-2">
+
+      </div>
 </div>
+{% endblock %}
+
+{% block js %}
+<script>
+  var postLayout = document.getElementById("postLayout");
+  var showMorePosts = document.getElementById("showMorePosts")
+
+  function appendPost(value, index, array){
+    postLayout.innerHTML += `<div class='col'><div class='card h-100'><img src='/media/${value.fields.image}' class='card-img-top'></div></div>`
+  }
+
+  function loadMorePosts(url){
+    fetch(url).then((response) => {
+      return response.json();
+    })
+    .then((response) => {
+      console.log(response)
+      response.payload.results.forEach(appendPost)
+      if(response.payload.next!=""){
+        showMorePosts.innerHTML = `<button type="button" class="btn btn-primary" onClick="loadMorePosts('http://127.0.0.1:8000/users/{{profile.user.username}}/posts/?page=${response.payload.next}')">Load More</button>`
+      }
+      else{
+        showMorePosts.innerHTML = "";
+      }
+    })
+  }
+
+  function listPosts(){
+    fetch("http://127.0.0.1:8000/users/{{profile.user.username}}/posts/").then((response) => {
+      return response.json();
+    })
+    .then((response) => {
+      console.log(response)
+      response.payload.results.forEach(appendPost)
+      if(response.payload.next!=""){
+        showMorePosts.innerHTML = `<button type="button" class="btn btn-primary" onClick="loadMorePosts('http://127.0.0.1:8000/users/{{profile.user.username}}/posts/?page=${response.payload.next}')">Load More</button>`
+      }
+      else{
+        showMorePosts.innerHTML = "";
+      }
+    })
+  }
+
+  listPosts();
+</script>
 {% endblock %}
