@@ -12,8 +12,10 @@ from users.models import Follow
 from django.core.serializers import serialize
 import json
 from posts.models import Post, Comment
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, F
 from django.views import View
+from posts.models import PostLike
+from django.db import transaction
 
 # Create your views here.
 
@@ -96,6 +98,11 @@ class PostDetail(LoginRequiredMixin, DetailView):
     
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         response = super().get(request, *args, **kwargs)
+        user_post_like = PostLike.objects.filter(user=request.user, post=response.context_data["post"])
+        if user_post_like.exists():
+            response.context_data["is_liked"] = True
+        else:
+            response.context_data["is_liked"] = False
         print(response.context_data)
         return response
     
@@ -138,3 +145,38 @@ class PostCommentView(LoginRequiredMixin, View):
         })
 
 
+class LikeDislikePostView(LoginRequiredMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        post_uuid = kwargs["uuid"]
+        with transaction.atomic():
+            post = Post.objects.filter(
+                (Q(user__followers__follower=self.request.user) | Q(user=self.request.user)),
+                uuid=self.kwargs["uuid"]
+            ).first()
+            if post is None:
+                raise Http404("Not Found")
+            post = Post.objects.filter(id=post.id).select_for_update(nowait=True).first()
+            post_like = PostLike.objects.filter(post=post, user=request.user).first()
+            if post_like is None:
+                PostLike.objects.create(
+                    post=post,
+                    user=request.user
+                )
+                post.like_count = F("like_count") + 1
+                post.save()
+                is_liked = True
+            else:
+                post_like.delete()
+                post.like_count = post.like_count - 1
+                post.save()
+                is_liked = False
+        post.refresh_from_db()
+        return JsonResponse({
+            "status": "success",
+            "message": "",
+            "payload": {
+                "is_liked": is_liked,
+                "like_count": post.like_count
+            }
+        })
