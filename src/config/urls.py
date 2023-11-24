@@ -19,13 +19,17 @@ from django.urls import path, include
 from mainapp.views import HomeView
 from django.conf import settings
 from django.conf.urls.static import static
+from users.api.views import SetCSRFCookie
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include("authentication.urls")),
     path('', HomeView.as_view(), name="home"),
     path('posts/', include("posts.urls")),
-    path('', include("users.urls"))
+    path('', include("users.urls")),
+    path('api/auth/', include('rest_framework.urls')),
+    path('api/', include("users.api.urls")),
+    path('setcsrf/', SetCSRFCookie.as_view(), name="set-csrf")
 ]
 
 if settings.DEBUG:

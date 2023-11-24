@@ -37,6 +37,22 @@
                 {% endfor %}
             </div>
 
+            <div class="" style="width: 600px;">
+                <div class="d-flex flex-row align-items-center">
+                    <p id="likeCount">{{post.like_count}} Likes</p>
+
+                    <form id="likeDislikeForm"> {% csrf_token %}
+                        <div id="likeDislikeButton">
+                            {% if is_liked == True %}
+                            <button type="button" class="btn btn-light" onclick="likeDislikePost()">Unlike</button>
+                            {% elif is_liked == False %}
+                            <button type="button" class="btn btn-primary" onclick="likeDislikePost()">Like</button>
+                            {% endif %}
+                        </div>
+
+                    </form>
+                </div>
+
             <form id="postCommentForm"> {% csrf_token %}
                 <div class="input-group mb-3 mt-2">
                 <input type="text" class="form-control" placeholder="Add a comment" aria-label="Recipient's username" aria-describedby="button-addon2" name="comment_detail" id="post-comment">
@@ -68,6 +84,29 @@
             console.log(response)
             comments.innerHTML = `<div class='d-flex flex-row align-items-center mb-2'> <img src=${response.payload.profile_img} alt='mdo' width='50' height='50' class='rounded-circle mr-1'><p><b> ${response.payload.user} </b> ${response.payload.comment_detail}</p></div>` + comments.innerHTML;
             document.getElementById("post-comment").value = ""
+        })
+    }
+
+    let likeDislikeButton = document.getElementById("likeDislikeButton");
+
+    function likeDislikePost(){
+        fetch(
+            "http://127.0.0.1:8000/posts/{{post.uuid}}/like_dislike/", {
+                method: 'POST',
+                body: new FormData(document.getElementById('likeDislikeForm'))
+            }
+        ).then((response) => {
+            return response.json();
+        })
+        .then((response) => {
+            console.log(response)
+            if(response.payload.is_liked == true){
+                likeDislikeButton.innerHTML = `<button type="button" class="btn btn-light" onclick="likeDislikePost()">Unlike</button>`;
+            }
+            else{
+                likeDislikeButton.innerHTML = `<button type="button" class="btn btn-primary" onclick="likeDislikePost()">Like</button>`;
+            }
+            document.getElementById("likeCount").innerHTML = `${response.payload.like_count} Likes`
         })
     }
 </script>
